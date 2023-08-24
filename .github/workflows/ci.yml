@@ -25,7 +25,7 @@ jobs:
     - name: Generate api controllers interfaces
       uses: craicoverflow/openapi-generator-generate-action@v1.2.1
       with:
-        version: v7.0.0-beta
+        version: 7.0.0-beta
         generator: go-gin-server        
         input: api/ambulance-wl.openapi.yaml
         additional-properties: apiPath=internal/ambulance_wl,packageName=ambulance_wl
