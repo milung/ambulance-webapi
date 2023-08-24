@@ -47,7 +47,7 @@ jobs:
       id: meta
       uses: docker/metadata-action@v4.6.0
       with:
-        images: <your-docker-id>/ambulance-wl-webapi
+        images: milung/ambulance-wl-webapi
         tags: |
             type=schedule
             type=ref,event=branch
