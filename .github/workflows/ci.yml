@@ -9,6 +9,7 @@ on:
     tags: [ "v1*" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch: {}
 
 jobs:
 
