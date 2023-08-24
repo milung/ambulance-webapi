@@ -8,6 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/milung/ambulance-webapi/api"
+	"github.com/milung/ambulance-webapi/internal/ambulance_wl"
+	"github.com/milung/ambulance-webapi/internal/db_service"
 )
 
 func main() {
@@ -25,7 +27,16 @@ func main() {
 	engine := gin.New()
 	engine.Use(gin.Recovery())
 
+	// setup context update  middleware
+	dbService := db_service.NewMongoService(db_service.MongoServiceConfig{})
+	engine.Use(func(ctx *gin.Context) {
+		ctx.Set("db_service", dbService)
+		ctx.Next()
+	})
+
 	// request routings
+	ambulance_wl.AddRoutes(engine)
+
 	engine.GET("/openapi", api.HandleOpenApi)
 
 	engine.Run(":" + port)

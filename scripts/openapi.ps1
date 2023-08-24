@@ -1,1 +1,0 @@
-docker run --rm -ti -v ${PWD}:/local openapitools/openapi-generator-cli generate -c /local/scripts/generator-cfg.yaml 

@@ -1,0 +1,26 @@
+services: 
+  mongo_db:
+    image: mongo:7.0-rc
+    container_name: mongo_db
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - db_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: pfx-ambulance-wl # @_pfx_@
+  mongo_express:
+    image: mongo-express
+    container_name: mongo_express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME:  ${MONGO_ROOT}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_SERVER: mongo_db
+volumes:
+  db_data: {}
+

@@ -16,7 +16,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetConditions - Provides the list of conditions associated with ambulance
-func GetConditions(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{})
+type AmbulanceConditionsAPI interface {
+
+	// internal registration of api routes
+	addRoutes(routerGroup *gin.RouterGroup)
+
+	// GetConditions - Provides the list of conditions associated with ambulance
+	GetConditions(ctx *gin.Context)
+
 }
+
+// partial implementation of AmbulanceConditionsAPI - all functions must be implemented in add on files
+type implAmbulanceConditionsAPI struct {
+
+}
+
+func newAmbulanceConditionsAPI() AmbulanceConditionsAPI {
+	return &implAmbulanceConditionsAPI{}
+}
+
+func (this *implAmbulanceConditionsAPI) addRoutes(routerGroup *gin.RouterGroup) {
+	routerGroup.Handle( http.MethodGet, "/waiting-list/:ambulanceId/condition", this.GetConditions) 
+
+}
+
+// Copy following section to separate file, uncomment, and implemented as needed
+// // GetConditions - Provides the list of conditions associated with ambulance
+// func (this *implAmbulanceConditionsAPI) GetConditions(ctx *gin.Context) {
+//  	ctx.AbortWithStatus(http.StatusNotImplemented)
+// }
+//
+

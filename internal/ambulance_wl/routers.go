@@ -11,99 +11,28 @@
 package ambulance_wl
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+		"github.com/gin-gonic/gin"
 )
 
-// Route is the information for every URI.
-type Route struct {
-	// Name is the name of this Route.
-	Name        string
-	// Method is the string for the HTTP method. ex) GET, POST etc..
-	Method      string
-	// Pattern is the pattern of the URI.
-	Pattern     string
-	// HandlerFunc is the handler function of this route.
-	HandlerFunc gin.HandlerFunc
-}
 
-// Routes is the list of the generated Route.
-type Routes []Route
-
-// NewRouter returns a new router.
-func NewRouter() *gin.Engine {
-	router := gin.Default()
-	for _, route := range routes {
-		switch route.Method {
-		case http.MethodGet:
-			router.GET(route.Pattern, route.HandlerFunc)
-		case http.MethodPost:
-			router.POST(route.Pattern, route.HandlerFunc)
-		case http.MethodPut:
-			router.PUT(route.Pattern, route.HandlerFunc)
-		case http.MethodPatch:
-			router.PATCH(route.Pattern, route.HandlerFunc)
-		case http.MethodDelete:
-			router.DELETE(route.Pattern, route.HandlerFunc)
-		}
+func AddRoutes(engine *gin.Engine) *gin.RouterGroup{
+	group := engine.Group("//api")
+	
+	{
+		api := newAmbulanceConditionsAPI()
+		api.addRoutes(group)
 	}
-
-	return router
-}
-
-// Index is the index handler.
-func Index(c *gin.Context) {
-	c.String(http.StatusOK, "Hello World!")
-}
-
-var routes = Routes{
+	
 	{
-		"Index",
-		http.MethodGet,
-		"/api/",
-		Index,
-	},
-
+		api := newAmbulanceWaitingListAPI()
+		api.addRoutes(group)
+	}
+	
 	{
-		"GetConditions",
-		http.MethodGet,
-		"/api/waiting-list/:ambulanceId/condition",
-		GetConditions,
-	},
+		api := newAmbulancesAPI()
+		api.addRoutes(group)
+	}
+	
 
-	{
-		"CreateWaitingListEntry",
-		http.MethodPost,
-		"/api/waiting-list/:ambulanceId/entries",
-		CreateWaitingListEntry,
-	},
-
-	{
-		"DeleteWaitingListEntry",
-		http.MethodDelete,
-		"/api/waiting-list/:ambulanceId/entries/:entryId",
-		DeleteWaitingListEntry,
-	},
-
-	{
-		"GetWaitingListEntries",
-		http.MethodGet,
-		"/api/waiting-list/:ambulanceId/entries",
-		GetWaitingListEntries,
-	},
-
-	{
-		"GetWaitingListEntry",
-		http.MethodGet,
-		"/api/waiting-list/:ambulanceId/entries/:entryId",
-		GetWaitingListEntry,
-	},
-
-	{
-		"UpdateWaitingListEntry",
-		http.MethodPut,
-		"/api/waiting-list/:ambulanceId/entries/:entryId",
-		UpdateWaitingListEntry,
-	},
+	return group
 }
