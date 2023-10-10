@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pfx-ambulance-webapi # @_pfx_@
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      pod: pfx-ambulance-webapi-label # @_pfx_@
+  template:
+    metadata:
+      labels:
+        pod: pfx-ambulance-webapi-label # @_pfx_@
+    spec:
+      volumes:
+        - name: init-scripts
+          configMap:
+            name: pfx-ambulance-webapi-mongodb-init # @_pfx_@
+      initContainers:
+        - name: init-mongodb
+          image: mongo:latest
+          imagePullPolicy: Always
+          command: ["mongosh", "-f", "/scripts/init-db.js"]
+          volumeMounts:
+            - name: init-scripts
+              mountPath: /scripts
+          env:
+            - name: AMBULANCE_API_PORT
+              value: "8080"
+            - name: AMBULANCE_API_MONGODB_HOST
+              value: mongo
+            - name: AMBULANCE_API_MONGODB_PORT
+              value: "27017"
+            - name: AMBULANCE_API_MONGODB_USERNAME
+              value: ""
+            - name: AMBULANCE_API_MONGODB_PASSWORD
+              value: ""
+            - name: AMBULANCE_API_MONGODB_DATABASE
+              value: pfx-ambulances
+            - name: AMBULANCE_API_MONGODB_COLLECTION
+              value: ambulances
+            - name: RETRY_CONNECTION_SECONDS
+              value: "5"
+          resources:
+            requests:
+              memory: "16Mi"
+              cpu: "0.01"
+            limits:
+              memory: "64Mi"
+              cpu: "0.1"
+      containers:
+        - name: pfx-ambulance-wl-webapi-container # @_pfx_@
+          image: pfx/ambulance-wl-webapi:latest # @_pfx_@
+          imagePullPolicy: Always
+          ports:
+            - name: webapi-port
+              containerPort: 8080
+          env:
+            - name: AMBULANCE_API_ENVIRONMENT
+              value: production
+            - name: AMBULANCE_API_PORT
+              value: "8080"
+            - name: AMBULANCE_API_MONGODB_HOST
+              value: mongo
+            - name: AMBULANCE_API_MONGODB_PORT
+              value: "27017"
+              # change to actual value
+            - name: AMBULANCE_API_MONGODB_USERNAME
+              value: ""
+              #change to actual value
+            - name: AMBULANCE_API_MONGODB_PASSWORD
+              value: ""
+            - name: AMBULANCE_API_MONGODB_DATABASE
+              value: <pfx>-ambulances
+            - name: AMBULANCE_API_MONGODB_COLLECTION
+              value: ambulances
+            - name: AMBULANCE_API_MONGODB_TIMEOUT_SECONDS
+              value: 5
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "0.01"
+            limits:
+              memory: "512Mi"
+              cpu: "0.3"
+        - name: openapi-ui
+          image: swaggerapi/swagger-ui
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8081
+          env:
+            - name: PORT
+              value: 8081
+            - name: URL
+              value: http://localhost:8080/.openapi/
+            - name: BASE_URL
+              value: /openapi-ui
+            - name: FILTER
+              value: "true"
+            - name: DISPLAY_OPERATION_ID
+              value: "true"
+          resources:
+            requests:
+              memory: "16M"
+              cpu: "0.01"
+            limits:
+              memory: "64M"
+              cpu: "0.1"
