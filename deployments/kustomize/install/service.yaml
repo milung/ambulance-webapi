@@ -1,10 +1,10 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: pfx-ambulance-webapi   # @_pfx_@
+  name: milung-ambulance-webapi
 spec:  
   selector:
-    pod: pfx-ambulance-webapi-label # @_pfx_@ 
+    pod: milung-ambulance-webapi-label
   ports:
   - name: http
     protocol: TCP

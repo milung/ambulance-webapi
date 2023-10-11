@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: pfx-ambulance-webapi # @_pfx_@
+  name: milung-ambulance-webapi 
 spec:
   replicas: 1
   selector:
     matchLabels:
-      pod: pfx-ambulance-webapi-label # @_pfx_@
+      pod: milung-ambulance-webapi-label 
   template:
     metadata:
       labels:
-        pod: pfx-ambulance-webapi-label # @_pfx_@
+        pod: milung-ambulance-webapi-label 
     spec:
       volumes:
         - name: init-scripts
           configMap:
-            name: pfx-ambulance-webapi-mongodb-init # @_pfx_@
+            name: milung-ambulance-webapi-mongodb-init 
       initContainers:
         - name: init-mongodb
           image: mongo:latest
@@ -36,7 +36,7 @@ spec:
             - name: AMBULANCE_API_MONGODB_PASSWORD
               value: ""
             - name: AMBULANCE_API_MONGODB_DATABASE
-              value: pfx-ambulances
+              value: milung-ambulances
             - name: AMBULANCE_API_MONGODB_COLLECTION
               value: ambulances
             - name: RETRY_CONNECTION_SECONDS
@@ -49,8 +49,8 @@ spec:
               memory: "64Mi"
               cpu: "0.1"
       containers:
-        - name: pfx-ambulance-wl-webapi-container # @_pfx_@
-          image: pfx/ambulance-wl-webapi:latest # @_pfx_@
+        - name: milung-ambulance-wl-webapi-container 
+          image: milung/ambulance-wl-webapi:latest 
           imagePullPolicy: Always
           ports:
             - name: webapi-port
