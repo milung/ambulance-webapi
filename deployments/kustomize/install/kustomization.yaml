@@ -6,10 +6,10 @@ resources:
 - service.yaml
 
 configMapGenerator:
-  - name: pfx-ambulance-webapi-mongodb-init # @_pfx_@
+  - name: milung-ambulance-webapi-mongodb-init
     files:
       - params/init-db.js
-  - name: pfx-ambulance-webapi-config # @_pfx_@
+  - name: milung-ambulance-webapi-config
     literals:
       - database=ambulance
       - collection=ambulance
