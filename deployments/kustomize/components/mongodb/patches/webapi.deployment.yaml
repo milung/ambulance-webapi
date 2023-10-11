@@ -20,12 +20,14 @@ spec:
                   key: port
             - name: AMBULANCE_API_MONGODB_USERNAME
               valueFrom:
-                secretKeyRef: mongodb-auth
-                key: username
+                secretKeyRef: 
+                  name: mongodb-auth
+                  key: username
             - name: AMBULANCE_API_MONGODB_PASSWORD
               valueFrom:
-                secretKeyRef: mongodb-auth
-                key: password
+                secretKeyRef: 
+                  name: mongodb-auth
+                  key: password
             - name: AMBULANCE_API_MONGODB_DATABASE
               valueFrom:
                 configMapKeyRef:
@@ -35,7 +37,7 @@ spec:
               valueFrom:
                 configMapKeyRef:
                   name: milung-ambulance-webapi-config 
-                key: collection
+                  key: collection
             - name: RETRY_CONNECTION_SECONDS
               value: "5"
       containers:
