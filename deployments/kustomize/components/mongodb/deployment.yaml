@@ -39,8 +39,8 @@ spec:
                 key: password
           resources:
             requests:
-              memory: "1GB"
+              memory: "1Gi"
               cpu: "0.1"
             limits:
-              memory: "4GB"
+              memory: "4Gi"
               cpu: "0.5"

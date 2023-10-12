@@ -19,4 +19,9 @@ secretGenerator:
     - password=admin
 
 patches:
-- path: patches/webapi.deployment.yaml
+- path: patches/webapi.deployment.patch.yaml
+  target:
+    group: apps
+    version: v1
+    kind: Deployment
+    name: milung-ambulance-webapi
