@@ -30,13 +30,13 @@ spec:
             - name: MONGO_INITDB_ROOT_USERNAME
               valueFrom:
                 secretKeyRef:
-                value: mongodb-auth
-                key: username
+                  name: mongodb-auth
+                  key: username
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
-                value: mongodb-auth
-                key: password
+                  name: mongodb-auth
+                  key: password
           resources:
             requests:
               memory: "1Gi"
