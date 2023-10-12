@@ -75,7 +75,7 @@ spec:
             - name: AMBULANCE_API_MONGODB_COLLECTION
               value: ambulances
             - name: AMBULANCE_API_MONGODB_TIMEOUT_SECONDS
-              value: 5
+              value: "5"
           resources:
             requests:
               memory: "64Mi"
