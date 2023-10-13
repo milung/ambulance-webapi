@@ -20,7 +20,7 @@ spec:
         - name: init-mongodb
           image: mongo:latest
           imagePullPolicy: Always
-          command: ["mongosh", "-f", "/scripts/init-db.js"]
+          command: ["mongosh", "--nodb", "-f", "/scripts/init-db.js"]
           volumeMounts:
             - name: init-scripts
               mountPath: /scripts
