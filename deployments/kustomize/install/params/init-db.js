@@ -2,7 +2,7 @@
 const mongoHost = process.env.AMBULANCE_API_MONGODB_HOST
 const mongoPort = process.env.AMBULANCE_API_MONGODB_PORT
 
-const mongoUser = process.env.AMBULANCE_API_MONGODB_USER
+const mongoUser = process.env.AMBULANCE_API_MONGODB_USERNAME
 const mongoPassword = process.env.AMBULANCE_API_MONGODB_PASSWORD
 
 const database = process.env.AMBULANCE_API_MONGODB_DATABASE
@@ -14,7 +14,7 @@ const retrySeconds = parseInt(process.env.RETRY_CONNECTION_SECONDS || "5") || 5;
 let connection;
 while(true) {
     try {
-        connection = Mongo(`mongodb://${mongoUse}:${mongoPassword}@${mongoHost}:${mongoPort}`);
+        connection = Mongo(`mongodb://${mongoUser}:${mongoPassword}@${mongoHost}:${mongoPort}`);
         break;
     } catch (exception) {
         print(`Cannot connect to mongoDB: ${exception}`);
