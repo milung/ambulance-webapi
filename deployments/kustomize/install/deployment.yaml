@@ -93,7 +93,7 @@ spec:
             - name: PORT
               value: "8081"
             - name: URL
-              value: http://localhost:8080/.openapi/
+              value: /openapi
             - name: BASE_URL
               value: /openapi-ui
             - name: FILTER

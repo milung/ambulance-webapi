@@ -16,7 +16,7 @@ import (
 
 
 func AddRoutes(engine *gin.Engine) *gin.RouterGroup{
-	group := engine.Group("//api")
+	group := engine.Group("/api")
 	
 	{
 		api := newAmbulanceConditionsAPI()

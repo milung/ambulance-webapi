@@ -7,7 +7,7 @@ import (
 
 
 func AddRoutes(engine *gin.Engine) *gin.RouterGroup{
-	group := engine.Group("/{{{basePathWithoutHost}}}")
+	group := engine.Group("{{{basePathWithoutHost}}}")
 	{{#apiInfo}}{{#apis}}
 	{
 		api := new{{classname}}()
