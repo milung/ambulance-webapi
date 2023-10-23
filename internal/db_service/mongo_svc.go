@@ -77,7 +77,7 @@ func NewMongoService(
 	}
 
 	if svc.DbName == "" {
-		svc.DbName = enviro("AMBULANCE_API_MONGODB_DBNAME", "<pfx>-ambulance-wl")
+		svc.DbName = enviro("AMBULANCE_API_MONGODB_DBNAME", "milung-ambulance-wl")
 	}
 
 	if svc.Collection == "" {
@@ -94,6 +94,14 @@ func NewMongoService(
 		}
 	}
 
+	log.Printf(
+		"MongoDB config: //%v@%v:%v/%v/%v",
+		svc.UserName,
+		svc.ServerHost,
+		svc.ServerPort,
+		svc.DbName,
+		svc.Collection,
+	)
 	return svc
 }
 

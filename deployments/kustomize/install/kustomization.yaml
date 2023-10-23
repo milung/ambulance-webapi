@@ -11,6 +11,5 @@ configMapGenerator:
       - params/init-db.js
   - name: milung-ambulance-webapi-config
     literals:
-      - database=ambulance
+      - database=milung-ambulance
       - collection=ambulance
-

@@ -36,9 +36,15 @@ spec:
             - name: AMBULANCE_API_MONGODB_PASSWORD
               value: ""
             - name: AMBULANCE_API_MONGODB_DATABASE
-              value: milung-ambulances
+              valueFrom:
+                configMapKeyRef:
+                  name: milung-ambulance-webapi-config
+                  key: database
             - name: AMBULANCE_API_MONGODB_COLLECTION
-              value: ambulances
+              valueFrom:
+                configMapKeyRef:
+                  name: milung-ambulance-webapi-config 
+                  key: collection
             - name: RETRY_CONNECTION_SECONDS
               value: "5"
           resources:
@@ -71,9 +77,15 @@ spec:
             - name: AMBULANCE_API_MONGODB_PASSWORD
               value: ""
             - name: AMBULANCE_API_MONGODB_DATABASE
-              value: milung-ambulances
+              valueFrom:
+                configMapKeyRef:
+                  name: milung-ambulance-webapi-config
+                  key: database
             - name: AMBULANCE_API_MONGODB_COLLECTION
-              value: ambulances
+              valueFrom:
+                configMapKeyRef:
+                  name: milung-ambulance-webapi-config 
+                  key: collection
             - name: AMBULANCE_API_MONGODB_TIMEOUT_SECONDS
               value: "5"
           resources:
