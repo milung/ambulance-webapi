@@ -29,6 +29,7 @@ if (databases.includes(database)) {
     const dbInstance = connection.getDB(database)
     collections = dbInstance.getCollectionNames()
     if (collections.includes(collection)) {
+        print(`Collection '${collection}' already exists in database '${database}'`)
         process.exit(0);
     }
 }
@@ -39,10 +40,10 @@ const db = connection.getDB(database)
 db.createCollection(collection)
 
 // create indexes
-db[collection].createIndex({ "ambulance": "id" })
+db[collection].createIndex({ "id": 1 })
 
 //insert sample data
-db[collection].insertMany([
+let result = db[collection].insertMany([
     {   
         id: "bobulova",
         name: "Dr.Bobulová",
@@ -54,6 +55,11 @@ db[collection].insertMany([
         
     }
 ]);
+
+if (result.writeError) {
+    console.error(result)
+    print(`Error when writing the data: ${result.errmsg}`)
+}
 
 // exit with success
 process.exit(0);
