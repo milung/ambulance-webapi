@@ -14,7 +14,7 @@ spec:
                 configMapKeyRef:
                   name: mongodb-connection
                   key: host
-            - name: AMBULANCE_API_MONGODB_PORTň
+            - name: AMBULANCE_API_MONGODB_PORT
               value: null
               valueFrom:
                 configMapKeyRef:
