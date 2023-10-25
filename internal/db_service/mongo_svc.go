@@ -78,7 +78,7 @@ func NewMongoService[DocType interface{}](
 	}
 
 	if svc.DbName == "" {
-		svc.DbName = enviro("AMBULANCE_API_MONGODB_DBNAME", "milung-ambulance-wl")
+		svc.DbName = enviro("AMBULANCE_API_MONGODB_DATABASE", "milung-ambulance-wl")
 	}
 
 	if svc.Collection == "" {
