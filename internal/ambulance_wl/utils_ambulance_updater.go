@@ -25,7 +25,7 @@ func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
 		return
 	}
 
-	db, ok := value.(db_service.DbService)
+	db, ok := value.(db_service.DbService[Ambulance])
 	if !ok {
 		ctx.JSON(
 			http.StatusInternalServerError,
@@ -39,12 +39,12 @@ func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
 
 	ambulanceId := ctx.Param("ambulanceId")
 
-	value, err := db.FindDocument(ctx, ambulanceId)
+	ambulance, err := db.FindDocument(ctx, ambulanceId)
 
 	switch err {
 	case nil:
 		// continue
-	case db_service.NotFoundError:
+	case db_service.ErrNotFound:
 		ctx.JSON(
 			http.StatusNotFound,
 			gin.H{
@@ -53,6 +53,7 @@ func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
 				"error":   err.Error(),
 			},
 		)
+		return
 	default:
 		ctx.JSON(
 			http.StatusBadGateway,
@@ -61,9 +62,9 @@ func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
 				"message": "Failed to load ambulance from database",
 				"error":   err.Error(),
 			})
+		return
 	}
 
-	ambulance, ok := value.(*Ambulance)
 	if !ok {
 		ctx.JSON(
 			http.StatusInternalServerError,
@@ -90,7 +91,7 @@ func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
 		} else {
 			ctx.AbortWithStatus(status)
 		}
-	case db_service.NotFoundError:
+	case db_service.ErrNotFound:
 		ctx.JSON(
 			http.StatusNotFound,
 			gin.H{

@@ -28,7 +28,7 @@ func main() {
 	engine.Use(gin.Recovery())
 
 	// setup context update  middleware
-	dbService := db_service.NewMongoService(db_service.MongoServiceConfig{})
+	dbService := db_service.NewMongoService[ambulance_wl.Ambulance](db_service.MongoServiceConfig{})
 	engine.Use(func(ctx *gin.Context) {
 		ctx.Set("db_service", dbService)
 		ctx.Next()

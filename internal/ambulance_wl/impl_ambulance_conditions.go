@@ -14,7 +14,11 @@ func (this *implAmbulanceConditionsAPI) GetConditions(ctx *gin.Context) {
 		ctx *gin.Context,
 		ambulance *Ambulance,
 	) (updatedAmbulance *Ambulance, responseContent interface{}, status int) {
-		return nil, ambulance.PredefinedConditions, http.StatusOK
+		result := ambulance.PredefinedConditions
+		if result == nil {
+			result = []Condition{}
+		}
+		return nil, result, http.StatusOK
 	})
 
 }

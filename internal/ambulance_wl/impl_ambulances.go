@@ -22,7 +22,7 @@ func (this *implAmbulancesAPI) CreateAmbulance(ctx *gin.Context) {
 		return
 	}
 
-	db, ok := value.(db_service.DbService)
+	db, ok := value.(db_service.DbService[Ambulance])
 	if !ok {
 		ctx.JSON(
 			http.StatusInternalServerError,
@@ -51,7 +51,7 @@ func (this *implAmbulancesAPI) CreateAmbulance(ctx *gin.Context) {
 		ambulance.Id = uuid.New().String()
 	}
 
-	err = db.CreateDocument(ctx, ambulance.Id, ambulance)
+	err = db.CreateDocument(ctx, ambulance.Id, &ambulance)
 
 	switch err {
 	case nil:
@@ -59,7 +59,7 @@ func (this *implAmbulancesAPI) CreateAmbulance(ctx *gin.Context) {
 			http.StatusCreated,
 			ambulance,
 		)
-	case db_service.ConflictError:
+	case db_service.ErrConflict:
 		ctx.JSON(
 			http.StatusConflict,
 			gin.H{
@@ -94,7 +94,7 @@ func (this *implAmbulancesAPI) DeleteAmbulance(ctx *gin.Context) {
 		return
 	}
 
-	db, ok := value.(db_service.DbService)
+	db, ok := value.(db_service.DbService[Ambulance])
 	if !ok {
 		ctx.JSON(
 			http.StatusInternalServerError,
@@ -112,7 +112,7 @@ func (this *implAmbulancesAPI) DeleteAmbulance(ctx *gin.Context) {
 	switch err {
 	case nil:
 		ctx.AbortWithStatus(http.StatusNoContent)
-	case db_service.NotFoundError:
+	case db_service.ErrNotFound:
 		ctx.JSON(
 			http.StatusNotFound,
 			gin.H{

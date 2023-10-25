@@ -100,7 +100,11 @@ func (this *implAmbulanceWaitingListAPI) DeleteWaitingListEntry(ctx *gin.Context
 // GetWaitingListEntries - Provides the ambulance waiting list
 func (this *implAmbulanceWaitingListAPI) GetWaitingListEntries(ctx *gin.Context) {
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
-		return ambulance, ambulance.WaitingList, http.StatusOK
+		result := ambulance.WaitingList
+		if result == nil {
+			result = []WaitingListEntry{}
+		}
+		return nil, result, http.StatusOK
 	})
 }
 

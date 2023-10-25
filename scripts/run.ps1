@@ -15,6 +15,7 @@ $env:AMBULANCE_API_MONGODB_PASSWORD="neUhaDnes"
 $ProjectRoot = "${PSScriptRoot}/.."
 
 function mongo {
+    
     docker compose --file ${ProjectRoot}/deployments/docker-compose/compose.yaml $args
 }
 
