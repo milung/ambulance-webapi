@@ -20,6 +20,7 @@ type DbService[DocType interface{}] interface {
 	FindDocument(ctx context.Context, id string) (*DocType, error)
 	UpdateDocument(ctx context.Context, id string, document *DocType) error
 	DeleteDocument(ctx context.Context, id string) error
+	Disconnect(ctx context.Context) error
 }
 
 var ErrNotFound = fmt.Errorf("document not found")
@@ -138,7 +139,7 @@ func (this *mongoSvc[DocType]) connect(ctx context.Context) (*mongo.Client, erro
 	}
 }
 
-func (this *mongoSvc[DocType]) disconnect(ctx context.Context) error {
+func (this *mongoSvc[DocType]) Disconnect(ctx context.Context) error {
 	client := this.client.Load()
 
 	if client != nil {

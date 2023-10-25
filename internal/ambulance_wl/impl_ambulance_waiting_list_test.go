@@ -8,45 +8,54 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/milung/ambulance-webapi/internal/db_service"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 )
 
 type AmbulanceWlSuite struct {
 	suite.Suite
-	dbServiceMock *DbServiceMock
+	dbServiceMock *DbServiceMock[Ambulance]
 }
 
 func TestAmbulanceWlSuite(t *testing.T) {
 	suite.Run(t, new(AmbulanceWlSuite))
 }
 
-type DbServiceMock struct {
+type DbServiceMock[DocType interface{}] struct {
 	mock.Mock
 }
 
-func (this *DbServiceMock) CreateDocument(ctx context.Context, id string, document interface{}) error {
+func (this *DbServiceMock[DocType]) CreateDocument(ctx context.Context, id string, document *DocType) error {
 	args := this.Called(ctx, id, document)
 	return args.Error(0)
 }
 
-func (this *DbServiceMock) FindDocument(ctx context.Context, id string) (interface{}, error) {
+func (this *DbServiceMock[DocType]) FindDocument(ctx context.Context, id string) (*DocType, error) {
 	args := this.Called(ctx, id)
-	return args.Get(0), args.Error(1)
+	return args.Get(0).(*DocType), args.Error(1)
 }
 
-func (this *DbServiceMock) UpdateDocument(ctx context.Context, id string, document interface{}) error {
+func (this *DbServiceMock[DocType]) UpdateDocument(ctx context.Context, id string, document *DocType) error {
 	args := this.Called(ctx, id, document)
 	return args.Error(0)
 }
 
-func (this *DbServiceMock) DeleteDocument(ctx context.Context, id string) error {
+func (this *DbServiceMock[DocType]) DeleteDocument(ctx context.Context, id string) error {
 	args := this.Called(ctx, id)
+	return args.Error(0)
+}
+
+func (this *DbServiceMock[DocType]) Disconnect(ctx context.Context) error {
+	args := this.Called(ctx)
 	return args.Error(0)
 }
 
 func (suite *AmbulanceWlSuite) SetupTest() {
-	suite.dbServiceMock = &DbServiceMock{}
+	suite.dbServiceMock = &DbServiceMock[Ambulance]{}
+
+	// Compile time Assert that the mock is of type db_service.DbService[Ambulance]
+	var _ db_service.DbService[Ambulance] = suite.dbServiceMock
 
 	suite.dbServiceMock.
 		On("FindDocument", mock.Anything, mock.Anything).
