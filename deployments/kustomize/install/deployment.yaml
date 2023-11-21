@@ -11,6 +11,7 @@ spec:
     metadata:
       labels:
         pod: milung-ambulance-webapi-label 
+      annotations:
         prometheus.io/scrape: 'true'
         prometheus.io/path: '/metrics'
         prometheus.io/port: '8080'
