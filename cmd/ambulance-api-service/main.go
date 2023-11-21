@@ -33,6 +33,7 @@ func initTelemetry() {
 		resource.WithAttributes(semconv.ServiceNameKey.String("Ambulance WebAPI Service")),
 		resource.WithAttributes(semconv.ServiceNamespaceKey.String("WAC Hospital")),
 		resource.WithSchemaURL(semconv.SchemaURL),
+		resource.WithContainer(),
 	)
 
 	if err != nil {

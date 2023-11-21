@@ -29,7 +29,7 @@ func (this *implAmbulanceWaitingListAPI) CreateWaitingListEntry(ctx *gin.Context
 			}, http.StatusBadRequest
 		}
 
-		if entry.Id == "" {
+		if entry.Id == "" || entry.Id == "@new" {
 			entry.Id = uuid.NewString()
 		}
 
