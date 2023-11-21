@@ -99,6 +99,7 @@ func (this *implAmbulanceWaitingListAPI) DeleteWaitingListEntry(ctx *gin.Context
 
 // GetWaitingListEntries - Provides the ambulance waiting list
 func (this *implAmbulanceWaitingListAPI) GetWaitingListEntries(ctx *gin.Context) {
+	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
 		result := ambulance.WaitingList
 		if result == nil {
@@ -110,6 +111,7 @@ func (this *implAmbulanceWaitingListAPI) GetWaitingListEntries(ctx *gin.Context)
 
 // GetWaitingListEntry - Provides details about waiting list entry
 func (this *implAmbulanceWaitingListAPI) GetWaitingListEntry(ctx *gin.Context) {
+	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
 		entryId := ctx.Param("entryId")
 
@@ -130,13 +132,14 @@ func (this *implAmbulanceWaitingListAPI) GetWaitingListEntry(ctx *gin.Context) {
 				"message": "Entry not found",
 			}, http.StatusNotFound
 		}
-
-		return ambulance, ambulance.WaitingList[entryIndx], http.StatusOK
+		// return nil ambulance - no need to update it in db
+		return nil, ambulance.WaitingList[entryIndx], http.StatusOK
 	})
 }
 
 // UpdateWaitingListEntry - Updates specific entry
 func (this *implAmbulanceWaitingListAPI) UpdateWaitingListEntry(ctx *gin.Context) {
+	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
 		var entry WaitingListEntry
 

@@ -20,6 +20,17 @@ function mongo {
 }
 
 switch ($command) {
+    "help" {
+        echo "Usage: run.ps1 [command]"
+        echo ""
+        echo "Commands:"
+        echo "  start: Starts the ambulance-api-service"
+        echo "  build: Builds the ambulance-api-service"
+        echo "  test:  Runs all unit tests"
+        echo "  mongo: Starts a mongodb instance for development"
+        echo "  docker: Builds a docker image"
+        echo "  openapi: Generates the openapi client"
+    }
     "openapi" {
         docker run --rm -ti  -v ${ProjectRoot}:/local openapitools/openapi-generator-cli generate -c /local/scripts/generator-cfg.yaml 
     }
@@ -31,6 +42,9 @@ switch ($command) {
             mongo down
         }
     }
+    "build" {
+        go build -o ${ProjectRoot}/bin/ambulance-api-service ${ProjectRoot}/cmd/ambulance-api-service
+    }
     "test" {
         go test -v ./...
     }
@@ -41,7 +55,7 @@ switch ($command) {
         docker build -t pfx/ambulance-wl-webapi -f ${ProjectRoot}/build/docker/Dockerfile . 
     }
     default {
-        throw "Unknown command: $command"
+        throw "Unknown command:"  + $command
     }
 }
 
