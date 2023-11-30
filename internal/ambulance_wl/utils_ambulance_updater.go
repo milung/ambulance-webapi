@@ -18,6 +18,7 @@ var (
 	dbMeter           = otel.Meter("waiting_list_access")
 	dbTimeSpent       metric.Float64Counter
 	waitingListLength = map[string]int64{}
+	tracer            = otel.Tracer("ambulance-wl-api")
 )
 
 // package initialization - called automaticaly by go runtime when package is used
@@ -41,6 +42,8 @@ type ambulanceUpdater = func(
 ) (updatedAmbulance *Ambulance, responseContent interface{}, status int)
 
 func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
+	spanctx, span := tracer.Start(ctx, "updateAmbulanceFunc")
+	defer span.End()
 	value, exists := ctx.Get("db_service")
 	if !exists {
 		ctx.JSON(
@@ -68,7 +71,7 @@ func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
 	ambulanceId := ctx.Param("ambulanceId")
 
 	start := time.Now()
-	ambulance, err := db.FindDocument(ctx, ambulanceId)
+	ambulance, err := db.FindDocument(spanctx, ambulanceId)
 	dbTimeSpent.Add(ctx, float64(float64(time.Since(start)))/float64(time.Millisecond), metric.WithAttributes(
 		attribute.String("operation", "find"),
 		attribute.String("ambulance_id", ambulanceId),
@@ -113,6 +116,7 @@ func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
 	updatedAmbulance, responseObject, status := updater(ctx, ambulance)
 
 	if updatedAmbulance != nil {
+
 		start := time.Now()
 		err = db.UpdateDocument(ctx, ambulanceId, updatedAmbulance)
 

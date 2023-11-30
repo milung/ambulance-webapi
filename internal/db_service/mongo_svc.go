@@ -13,6 +13,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/trace"
 )
 
 type DbService[DocType interface{}] interface {
@@ -25,6 +29,8 @@ type DbService[DocType interface{}] interface {
 
 var ErrNotFound = fmt.Errorf("document not found")
 var ErrConflict = fmt.Errorf("conflict: document already exists")
+
+var tracer = otel.Tracer("db_service")
 
 type MongoServiceConfig struct {
 	ServerHost string
@@ -107,6 +113,8 @@ func NewMongoService[DocType interface{}](
 }
 
 func (this *mongoSvc[DocType]) connect(ctx context.Context) (*mongo.Client, error) {
+	ctx, span := tracer.Start(ctx, "mongoSvc.connect")
+	defer span.End()
 	// optimistic check
 	client := this.client.Load()
 	if client != nil {
@@ -140,6 +148,8 @@ func (this *mongoSvc[DocType]) connect(ctx context.Context) (*mongo.Client, erro
 }
 
 func (this *mongoSvc[DocType]) Disconnect(ctx context.Context) error {
+	ctx, span := tracer.Start(ctx, "mongoSvc.Disconnect")
+	defer span.End()
 	client := this.client.Load()
 
 	if client != nil {
@@ -158,6 +168,12 @@ func (this *mongoSvc[DocType]) Disconnect(ctx context.Context) error {
 }
 
 func (this *mongoSvc[DocType]) CreateDocument(ctx context.Context, id string, document *DocType) error {
+	ctx, span := tracer.Start(ctx,
+		"mongoSvc.CreateDocument",
+		trace.WithAttributes(attribute.String("id", id)),
+	)
+	defer span.End()
+
 	ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)
 	defer contextCancel()
 	client, err := this.connect(ctx)
@@ -181,18 +197,38 @@ func (this *mongoSvc[DocType]) CreateDocument(ctx context.Context, id string, do
 }
 
 func (this *mongoSvc[DocType]) FindDocument(ctx context.Context, id string) (*DocType, error) {
+	ctx, span := tracer.Start(
+		ctx, "mongoSvc.FindDocument",
+		trace.WithAttributes(attribute.String("id", id)),
+	)
+	defer span.End()
+
 	ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)
 	defer contextCancel()
 	client, err := this.connect(ctx)
 	if err != nil {
 		return nil, err
 	}
+
+	// create nested span to trace db connection
+	ctx, findspan := tracer.Start(
+		ctx,
+		"mongoSvc.FindDocument.find",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer findspan.End()
+
 	db := client.Database(this.DbName)
 	collection := db.Collection(this.Collection)
 	result := collection.FindOne(ctx, bson.D{{Key: "id", Value: id}})
+	if result.Err() != nil {
+		findspan.SetStatus(codes.Error, "mongoSvc.FindDocument.find failed")
+		span.SetStatus(codes.Error, "mongoSvc.FindDocument.find failed")
+	}
 	switch result.Err() {
 	case nil:
 	case mongo.ErrNoDocuments:
+		findspan.AddEvent("document not found")
 		return nil, ErrNotFound
 	default: // other errors - return them
 		return nil, result.Err()
@@ -205,43 +241,95 @@ func (this *mongoSvc[DocType]) FindDocument(ctx context.Context, id string) (*Do
 }
 
 func (this *mongoSvc[DocType]) UpdateDocument(ctx context.Context, id string, document *DocType) error {
+	ctx, span := tracer.Start(
+		ctx,
+		"mongoSvc.UpdateDocument",
+		trace.WithAttributes(attribute.String("id", id)),
+	)
+	defer span.End()
+
 	ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)
 	defer contextCancel()
 	client, err := this.connect(ctx)
 	if err != nil {
+		span.SetStatus(codes.Error, "mongoSvc.UpdateDocument failed")
 		return err
 	}
+
+	// create nested span to trace db connection
+	ctx, findspan := tracer.Start(
+		ctx,
+		"mongoSvc.UpdateDocument.find_replace",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer findspan.End()
 	db := client.Database(this.DbName)
 	collection := db.Collection(this.Collection)
 	result := collection.FindOne(ctx, bson.D{{Key: "id", Value: id}})
+	if result.Err() != nil {
+		findspan.SetStatus(codes.Error, "mongoSvc.UpdateDocument.find_replace failed")
+		span.SetStatus(codes.Error, "mongoSvc.UpdateDocument failed")
+	}
+
 	switch result.Err() {
 	case nil:
 	case mongo.ErrNoDocuments:
+		findspan.AddEvent("document not found")
 		return ErrNotFound
 	default: // other errors - return them
 		return result.Err()
 	}
+	findspan.AddEvent("document found")
 	_, err = collection.ReplaceOne(ctx, bson.D{{Key: "id", Value: id}}, document)
+	if err != nil {
+		findspan.AddEvent("document replace failed")
+		findspan.SetStatus(codes.Error, "mongoSvc.UpdateDocument.find_replace failed")
+		span.SetStatus(codes.Error, "mongoSvc.UpdateDocument failed")
+	}
 	return err
 }
 
 func (this *mongoSvc[DocType]) DeleteDocument(ctx context.Context, id string) error {
+	ctx, span := tracer.Start(
+		ctx,
+		"mongoSvc.DeleteDocument",
+		trace.WithAttributes(attribute.String("id", id)),
+	)
+	defer span.End()
 	ctx, contextCancel := context.WithTimeout(ctx, this.Timeout)
 	defer contextCancel()
 	client, err := this.connect(ctx)
 	if err != nil {
 		return err
 	}
+	// create nested span to trace db connection
+	ctx, findspan := tracer.Start(
+		ctx,
+		"mongoSvc.UpdateDocument.find_delete",
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer findspan.End()
+
 	db := client.Database(this.DbName)
 	collection := db.Collection(this.Collection)
 	result := collection.FindOne(ctx, bson.D{{Key: "id", Value: id}})
+	if result.Err() != nil {
+		span.SetStatus(codes.Error, "mongoSvc.DeleteDocument.find_delete failed")
+		findspan.SetStatus(codes.Error, "mongoSvc.DeleteDocument.find_delete failed")
+	}
 	switch result.Err() {
 	case nil:
 	case mongo.ErrNoDocuments:
+		findspan.AddEvent("document not found")
 		return ErrNotFound
 	default: // other errors - return them
 		return result.Err()
 	}
 	_, err = collection.DeleteOne(ctx, bson.D{{Key: "id", Value: id}})
+	if err != nil {
+		findspan.AddEvent("document delete failed")
+		findspan.SetStatus(codes.Error, "mongoSvc.DeleteDocument.find_delete failed")
+		span.SetStatus(codes.Error, "mongoSvc.DeleteDocument failed")
+	}
 	return err
 }

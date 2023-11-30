@@ -12,6 +12,9 @@ import (
 // CreateWaitingListEntry - Saves new entry into waiting list
 func (this *implAmbulanceWaitingListAPI) CreateWaitingListEntry(ctx *gin.Context) {
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
+		spanctx, span := tracer.Start(ctx, "CreateWaitingListEntry")
+		defer span.End()
+
 		var entry WaitingListEntry
 
 		if err := c.ShouldBindJSON(&entry); err != nil {
@@ -53,7 +56,7 @@ func (this *implAmbulanceWaitingListAPI) CreateWaitingListEntry(ctx *gin.Context
 		}
 
 		ambulance.WaitingList = append(ambulance.WaitingList, entry)
-		ambulance.reconcileWaitingList()
+		ambulance.reconcileWaitingList(spanctx)
 		// entry was copied by value return reconciled value from the list
 		entryIndx := slices.IndexFunc(ambulance.WaitingList, func(waiting WaitingListEntry) bool {
 			return entry.Id == waiting.Id
@@ -71,6 +74,9 @@ func (this *implAmbulanceWaitingListAPI) CreateWaitingListEntry(ctx *gin.Context
 // DeleteWaitingListEntry - Deletes specific entry
 func (this *implAmbulanceWaitingListAPI) DeleteWaitingListEntry(ctx *gin.Context) {
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
+		spanctx, span := tracer.Start(ctx, "DeleteWaitingListEntry")
+		defer span.End()
+
 		entryId := ctx.Param("entryId")
 
 		if entryId == "" {
@@ -92,7 +98,7 @@ func (this *implAmbulanceWaitingListAPI) DeleteWaitingListEntry(ctx *gin.Context
 		}
 
 		ambulance.WaitingList = append(ambulance.WaitingList[:entryIndx], ambulance.WaitingList[entryIndx+1:]...)
-		ambulance.reconcileWaitingList()
+		ambulance.reconcileWaitingList(spanctx)
 		return ambulance, nil, http.StatusNoContent
 	})
 }
@@ -101,6 +107,9 @@ func (this *implAmbulanceWaitingListAPI) DeleteWaitingListEntry(ctx *gin.Context
 func (this *implAmbulanceWaitingListAPI) GetWaitingListEntries(ctx *gin.Context) {
 	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
+		_, span := tracer.Start(ctx, "GetWaitingListEntries")
+		defer span.End()
+
 		result := ambulance.WaitingList
 		if result == nil {
 			result = []WaitingListEntry{}
@@ -113,6 +122,9 @@ func (this *implAmbulanceWaitingListAPI) GetWaitingListEntries(ctx *gin.Context)
 func (this *implAmbulanceWaitingListAPI) GetWaitingListEntry(ctx *gin.Context) {
 	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
+		_, span := tracer.Start(ctx, "GetWaitingListEntry")
+		defer span.End()
+
 		entryId := ctx.Param("entryId")
 
 		if entryId == "" {
@@ -139,8 +151,11 @@ func (this *implAmbulanceWaitingListAPI) GetWaitingListEntry(ctx *gin.Context) {
 
 // UpdateWaitingListEntry - Updates specific entry
 func (this *implAmbulanceWaitingListAPI) UpdateWaitingListEntry(ctx *gin.Context) {
+
 	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
+		spanctx, span := tracer.Start(ctx, "UpdateWaitingListEntry")
+		defer span.End()
 		var entry WaitingListEntry
 
 		if err := c.ShouldBindJSON(&entry); err != nil {
@@ -187,7 +202,7 @@ func (this *implAmbulanceWaitingListAPI) UpdateWaitingListEntry(ctx *gin.Context
 			ambulance.WaitingList[entryIndx].EstimatedDurationMinutes = entry.EstimatedDurationMinutes
 		}
 
-		ambulance.reconcileWaitingList()
+		ambulance.reconcileWaitingList(spanctx)
 		return ambulance, ambulance.WaitingList[entryIndx], http.StatusOK
 	})
 }

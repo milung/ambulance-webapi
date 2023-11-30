@@ -35,7 +35,6 @@ func newAmbulanceConditionsAPI() AmbulanceConditionsAPI {
 
 func (this *implAmbulanceConditionsAPI) addRoutes(routerGroup *gin.RouterGroup) {
 	routerGroup.Handle(http.MethodGet, "/waiting-list/:ambulanceId/condition", this.GetConditions)
-
 }
 
 // Copy following section to separate file, uncomment, and implemented as needed
