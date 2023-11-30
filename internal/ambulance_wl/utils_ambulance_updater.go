@@ -11,6 +11,7 @@ import (
 	"github.com/milung/ambulance-webapi/internal/db_service"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/metric"
 )
 
@@ -116,9 +117,9 @@ func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
 	updatedAmbulance, responseObject, status := updater(ctx, ambulance)
 
 	if updatedAmbulance != nil {
-
+		span.AddEvent("updateAmbulanceFunc: updating ambulance in database")
 		start := time.Now()
-		err = db.UpdateDocument(ctx, ambulanceId, updatedAmbulance)
+		err = db.UpdateDocument(spanctx, ambulanceId, updatedAmbulance)
 
 		// update metrics
 		dbTimeSpent.Add(ctx, float64(float64(time.Since(start)))/float64(time.Millisecond), metric.WithAttributes(
@@ -158,6 +159,10 @@ func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
 
 	} else {
 		err = nil // redundant but for clarity
+	}
+
+	if err != nil {
+		span.SetStatus(codes.Error, err.Error())
 	}
 
 	switch err {

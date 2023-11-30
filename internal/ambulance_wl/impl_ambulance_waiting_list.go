@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 	"golang.org/x/exp/slices"
 )
 
@@ -154,7 +156,14 @@ func (this *implAmbulanceWaitingListAPI) UpdateWaitingListEntry(ctx *gin.Context
 
 	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
-		spanctx, span := tracer.Start(ctx, "UpdateWaitingListEntry")
+		spanctx, span := tracer.Start(
+			ctx,
+			"UpdateWaitingListEntry",
+			trace.WithAttributes(
+				attribute.String("ambulance_id", ambulance.Id),
+				attribute.String("ambulance_name", ambulance.Name),
+			),
+		)
 		defer span.End()
 		var entry WaitingListEntry
 
