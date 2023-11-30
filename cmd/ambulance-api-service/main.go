@@ -72,6 +72,7 @@ func initTelemetry() (func(context.Context) error, error) {
 		// Shutdown function will flush any remaining spans
 		return traceProvider.Shutdown, nil
 	} else {
+		log.Printf("OTLP trace exporter not configured - %s", traceExportType)
 		// no otlp trace exporter configured
 		noopShutdown := func(context.Context) error { return nil }
 		return noopShutdown, nil
