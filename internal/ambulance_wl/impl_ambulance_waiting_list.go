@@ -14,7 +14,7 @@ import (
 // CreateWaitingListEntry - Saves new entry into waiting list
 func (this *implAmbulanceWaitingListAPI) CreateWaitingListEntry(ctx *gin.Context) {
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
-		spanctx, span := tracer.Start(ctx, "CreateWaitingListEntry")
+		spanctx, span := tracer.Start(c.Request.Context(), "CreateWaitingListEntry")
 		defer span.End()
 
 		var entry WaitingListEntry
@@ -76,7 +76,7 @@ func (this *implAmbulanceWaitingListAPI) CreateWaitingListEntry(ctx *gin.Context
 // DeleteWaitingListEntry - Deletes specific entry
 func (this *implAmbulanceWaitingListAPI) DeleteWaitingListEntry(ctx *gin.Context) {
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
-		spanctx, span := tracer.Start(ctx, "DeleteWaitingListEntry")
+		spanctx, span := tracer.Start(c.Request.Context(), "DeleteWaitingListEntry")
 		defer span.End()
 
 		entryId := ctx.Param("entryId")
@@ -109,7 +109,7 @@ func (this *implAmbulanceWaitingListAPI) DeleteWaitingListEntry(ctx *gin.Context
 func (this *implAmbulanceWaitingListAPI) GetWaitingListEntries(ctx *gin.Context) {
 	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
-		_, span := tracer.Start(ctx, "GetWaitingListEntries")
+		_, span := tracer.Start(c.Request.Context(), "GetWaitingListEntries")
 		defer span.End()
 
 		result := ambulance.WaitingList
@@ -124,7 +124,7 @@ func (this *implAmbulanceWaitingListAPI) GetWaitingListEntries(ctx *gin.Context)
 func (this *implAmbulanceWaitingListAPI) GetWaitingListEntry(ctx *gin.Context) {
 	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
-		_, span := tracer.Start(ctx, "GetWaitingListEntry")
+		_, span := tracer.Start(c.Request.Context(), "GetWaitingListEntry")
 		defer span.End()
 
 		entryId := ctx.Param("entryId")
@@ -157,7 +157,7 @@ func (this *implAmbulanceWaitingListAPI) UpdateWaitingListEntry(ctx *gin.Context
 	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
 		spanctx, span := tracer.Start(
-			ctx,
+			c.Request.Context(),
 			"UpdateWaitingListEntry",
 			trace.WithAttributes(
 				attribute.String("ambulance_id", ambulance.Id),

@@ -43,7 +43,7 @@ type ambulanceUpdater = func(
 ) (updatedAmbulance *Ambulance, responseContent interface{}, status int)
 
 func updateAmbulanceFunc(ctx *gin.Context, updater ambulanceUpdater) {
-	spanctx, span := tracer.Start(ctx, "updateAmbulanceFunc")
+	spanctx, span := tracer.Start(ctx.Request.Context(), "updateAmbulanceFunc")
 	defer span.End()
 	value, exists := ctx.Get("db_service")
 	if !exists {
