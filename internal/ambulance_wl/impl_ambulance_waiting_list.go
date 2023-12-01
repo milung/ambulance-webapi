@@ -153,9 +153,11 @@ func (this *implAmbulanceWaitingListAPI) GetWaitingListEntry(ctx *gin.Context) {
 
 // UpdateWaitingListEntry - Updates specific entry
 func (this *implAmbulanceWaitingListAPI) UpdateWaitingListEntry(ctx *gin.Context) {
-
 	// update ambulance document
 	updateAmbulanceFunc(ctx, func(c *gin.Context, ambulance *Ambulance) (*Ambulance, interface{}, int) {
+		// special handling for gin context
+		// we need to extract the span context and create a new context to ensure span context propagation
+		// to the updater function
 		spanctx, span := tracer.Start(
 			c.Request.Context(),
 			"UpdateWaitingListEntry",
@@ -164,6 +166,7 @@ func (this *implAmbulanceWaitingListAPI) UpdateWaitingListEntry(ctx *gin.Context
 				attribute.String("ambulance_name", ambulance.Name),
 			),
 		)
+		c.Request = c.Request.WithContext(spanctx)
 		defer span.End()
 		var entry WaitingListEntry
 
